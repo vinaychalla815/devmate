@@ -6,78 +6,139 @@
   <title>DevMate</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
       background-color: #0f172a;
-      color: #f1f5f9;
+      color: #e2e8f0;
       margin: 0;
-      padding: 30px;
+      padding: 0;
+    }
+
+    /* Top Header Bar */
+    header {
+      background-color: #1e293b;
+      color: #38bdf8;
+      padding: 15px 25px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 18px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #334155;
+    }
+
+    main {
+      padding: 40px;
       text-align: center;
     }
+
     h1 {
+      font-size: 28px;
       color: #38bdf8;
+      margin-bottom: 5px;
     }
+
+    h2 {
+      font-size: 15px;
+      color: #94a3b8;
+      margin-top: 0;
+      margin-bottom: 25px;
+      font-weight: 400;
+    }
+
     textarea {
       width: 90%;
       height: 180px;
-      margin-top: 20px;
-      padding: 10px;
+      margin-top: 10px;
+      padding: 12px;
       font-size: 15px;
       border-radius: 8px;
-      border: none;
-      outline: none;
+      border: 1px solid #334155;
       background-color: #1e293b;
       color: #f8fafc;
+      resize: none;
     }
+
     button {
       margin: 15px 10px;
-      padding: 12px 20px;
-      font-size: 16px;
+      padding: 12px 24px;
+      font-size: 15px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       background-color: #38bdf8;
       color: #0f172a;
-      font-weight: bold;
+      font-weight: 600;
       transition: 0.2s;
     }
+
     button:hover {
       background-color: #7dd3fc;
     }
+
+    #loader {
+      display: none;
+      margin-top: 15px;
+      font-size: 15px;
+      color: #94a3b8;
+    }
+
     #output {
       margin-top: 25px;
       text-align: left;
-      white-space: pre-wrap;
-      background-color: #1e293b;
+      background-color: #0f172a;
       padding: 15px;
       border-radius: 8px;
       width: 90%;
       margin-left: auto;
       margin-right: auto;
+      font-family: "Consolas", monospace;
+      font-size: 15px;
+      border: 1px solid #334155;
+      overflow-x: auto;
+      white-space: pre;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 13px;
+      color: #64748b;
+      padding: 15px;
+      border-top: 1px solid #1e293b;
     }
   </style>
 </head>
 <body>
-  <h1>🚀 DevMate AI Assistant</h1>
-  <p>Paste your code below and choose an action:</p>
+  <header>DevMate — AI Developer Assistant</header>
+  <main>
+    <h1>DevMate</h1>
+    <h2>Your AI Coding Teammate</h2>
 
-  <textarea id="codeInput" placeholder="Paste your code here..."></textarea><br />
+    <textarea id="codeInput" placeholder="Paste your code here..."></textarea><br />
 
-  <button onclick="handleAction('review')">🧐 Review Code</button>
-  <button onclick="handleAction('testgen')">🧪 Generate Tests</button>
-  <button onclick="handleAction('docupdate')">📝 Update Docs</button>
+    <button onclick="handleAction('review')">Review Code</button>
+    <button onclick="handleAction('testgen')">Generate Tests</button>
+    <button onclick="handleAction('docupdate')">Update Docs</button>
 
-  <div id="output"></div>
+    <div id="loader">Processing your request...</div>
+    <div id="output"></div>
+  </main>
+
+  <footer>DevMate MVP v0.1 | Built with FastAPI & OpenAI</footer>
 
   <script>
     async function handleAction(action) {
       const code = document.getElementById('codeInput').value.trim();
       const outputDiv = document.getElementById('output');
+      const loader = document.getElementById('loader');
+
       if (!code) {
-        outputDiv.innerText = "⚠️ Please enter some code first!";
+        outputDiv.innerText = "Please enter some code first.";
         return;
       }
 
-      outputDiv.innerText = "⏳ Processing your request...";
+      loader.style.display = "block";
+      outputDiv.innerText = "";
 
       try {
         const response = await fetch(`/${action}`, {
@@ -87,9 +148,13 @@
         });
 
         const data = await response.json();
-        outputDiv.innerText = data.review || data.tests || data.documentation || "No response.";
+        loader.style.display = "none";
+
+        const result = data.review || data.tests || data.documentation || "No response.";
+        outputDiv.innerHTML = `<pre>${result}</pre>`;
       } catch (error) {
-        outputDiv.innerText = "❌ Error connecting to server.";
+        loader.style.display = "none";
+        outputDiv.innerText = "Error connecting to the server.";
       }
     }
   </script>

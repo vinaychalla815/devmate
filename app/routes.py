@@ -33,18 +33,19 @@ def review_code(request: CodeRequest):
 # --- 2. /testgen endpoint ---
 @router.post("/testgen")
 def generate_tests(request: CodeRequest):
-    """Generate test cases for the given code"""
-    prompt = f"Generate Python unit test cases for the following code using pytest:\n\n{request.code}"
+    """Generate clean Python unit test code using pytest"""
+    prompt = f"Generate only the Python pytest code (no explanations) for the following function:\n\n{request.code}"
 
     response = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are an expert Python test generator."},
+            {"role": "system", "content": "You are an expert Python test generator. Return only code, no explanations."},
             {"role": "user", "content": prompt}
         ]
     )
 
-    return {"tests": response.choices[0].message.content}
+    clean_output = response.choices[0].message.content.strip("`python").strip("`").strip()
+    return {"tests": clean_output}
    
 
 # --- 3. /docupdate endpoint ---
