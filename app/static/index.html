@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevMate</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: #f1f5f9;
+      margin: 0;
+      padding: 30px;
+      text-align: center;
+    }
+    h1 {
+      color: #38bdf8;
+    }
+    textarea {
+      width: 90%;
+      height: 180px;
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background-color: #1e293b;
+      color: #f8fafc;
+    }
+    button {
+      margin: 15px 10px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #38bdf8;
+      color: #0f172a;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    button:hover {
+      background-color: #7dd3fc;
+    }
+    #output {
+      margin-top: 25px;
+      text-align: left;
+      white-space: pre-wrap;
+      background-color: #1e293b;
+      padding: 15px;
+      border-radius: 8px;
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 DevMate AI Assistant</h1>
+  <p>Paste your code below and choose an action:</p>
+
+  <textarea id="codeInput" placeholder="Paste your code here..."></textarea><br />
+
+  <button onclick="handleAction('review')">🧐 Review Code</button>
+  <button onclick="handleAction('testgen')">🧪 Generate Tests</button>
+  <button onclick="handleAction('docupdate')">📝 Update Docs</button>
+
+  <div id="output"></div>
+
+  <script>
+    async function handleAction(action) {
+      const code = document.getElementById('codeInput').value.trim();
+      const outputDiv = document.getElementById('output');
+      if (!code) {
+        outputDiv.innerText = "⚠️ Please enter some code first!";
+        return;
+      }
+
+      outputDiv.innerText = "⏳ Processing your request...";
+
+      try {
+        const response = await fetch(`/${action}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        });
+
+        const data = await response.json();
+        outputDiv.innerText = data.review || data.tests || data.documentation || "No response.";
+      } catch (error) {
+        outputDiv.innerText = "❌ Error connecting to server.";
+      }
+    }
+  </script>
+</body>
+</html>
