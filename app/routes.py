@@ -73,3 +73,9 @@ def update_docs(request: CodeRequest):
     )
 
     return {"documentation": response.choices[0].message.content}
+from app.github_client import list_repo_files
+
+@router.get("/list_repo")
+def list_repo(repo: str):
+    """Return list of files in the specified GitHub repo."""
+    return {"files": list_repo_files(repo)}
