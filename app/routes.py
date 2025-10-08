@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from openai import OpenAI
+from app.memory_manager import summarize_code, store_summary
 import os
 from dotenv import load_dotenv
 
@@ -16,18 +17,27 @@ class CodeRequest(BaseModel):
 # --- 1. /review endpoint ---
 @router.post("/review")
 def review_code(request: CodeRequest):
-    """Review the given code using OpenAI"""
+    """Review the given code using OpenAI (v2.1.0 syntax)"""
     prompt = f"Review this Python code and suggest improvements:\n\n{request.code}"
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a professional code reviewer."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+    try:
+        # ✅ Correct call for OpenAI v2.x
+        response = client.responses.create(
+            model="gpt-4o-mini",
+            input=prompt
+        )
 
-    return {"review": response.choices[0].message.content}
+        review_text = response.output[0].content[0].text
+
+        # ✅ Summarize and store memory (optional)
+        summary = summarize_code(request.code)
+        store_summary("reviewed_code.py", summary)
+
+        return {"review": review_text}
+
+    except Exception as e:
+        # 👇 This will show clear errors instead of "Internal Server Error"
+        return {"error": str(e)}
 
 
 # --- 2. /testgen endpoint ---
