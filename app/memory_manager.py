@@ -1,6 +1,8 @@
 import os
 import json
+from datetime import datetime
 from openai import OpenAI
+from app.logger_config import request_id_var, logger
 
 client = OpenAI()
 
@@ -12,9 +14,18 @@ def store_summary(file_path, summary):
     file_name = os.path.basename(file_path)
     memory_file = os.path.join(MEMORY_DIR, f"{file_name}.json")
 
-    data = {"file": file_name, "summary": summary}
+    request_id = request_id_var.get() or "unknown"
+    data = {
+        "file": file_name,
+        "summary": summary,
+        "request_id": request_id,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
     with open(memory_file, "w") as f:
-        json.dump(data, f)
+        json.dump(data, f, indent=2)
+
+    logger.info(f"Memory stored → {memory_file} (Request ID: {request_id})")
 
 def get_all_summaries():
     """Retrieve all saved file summaries."""
