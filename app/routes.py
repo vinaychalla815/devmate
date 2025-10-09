@@ -4,6 +4,7 @@ from openai import OpenAI
 from app.memory_manager import summarize_code, store_summary
 import os
 from dotenv import load_dotenv
+from app.logger_config import logger
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -17,6 +18,7 @@ class CodeRequest(BaseModel):
 # --- 1. /review endpoint ---
 @router.post("/review")
 def review_code(request: CodeRequest):
+    logger.info(f"Received review request. Code length: {len(request.code)} chars.")
     """Review the given code using OpenAI (v2.1.0 syntax)"""
     prompt = f"Review this Python code and suggest improvements:\n\n{request.code}"
 
@@ -43,6 +45,7 @@ def review_code(request: CodeRequest):
 # --- 2. /testgen endpoint ---
 @router.post("/testgen")
 def generate_tests(request: CodeRequest):
+    logger.info(f"Generating tests for code snippet (length: {len(request.code)} chars)")
     """Generate clean Python unit test code using pytest"""
     prompt = f"Generate only the Python pytest code (no explanations) for the following function:\n\n{request.code}"
 
@@ -61,6 +64,7 @@ def generate_tests(request: CodeRequest):
 # --- 3. /docupdate endpoint ---
 @router.post("/docupdate")
 def update_docs(request: CodeRequest):
+    logger.info(f"Updating documentation for provided code snippet (length: {len(request.code)} chars)")
     """Generate or improve docstrings and comments for the given code"""
     prompt = f"Add or improve Python docstrings and inline comments for the following code:\n\n{request.code}"
 
@@ -79,3 +83,11 @@ from app.github_client import list_repo_files
 def list_repo(repo: str):
     """Return list of files in the specified GitHub repo."""
     return {"files": list_repo_files(repo)}
+
+from app.repo_summarizer import summarize_repo
+
+@router.get("/summarize_repo")
+def summarize_repository(repo: str):
+    logger.info(f"Summarizing repository: {repo}")
+    """Summarize all Python files in the repo and save to memory."""
+    return summarize_repo(repo)
